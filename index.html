@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<!--
+   ______                            __
+  / ____/___  ____ ___  ____  __  __/ /____  _____
+ / /   / __ \/ __ `__ \/ __ \/ / / / __/ _ \/ ___/
+/ /___/ /_/ / / / / / / /_/ / /_/ / /_/  __/ /
+\____/\____/_/ /_/ /_/ .___/\__,_/\__/\___/_/
+                    /_/
+        Created with Perplexity Computer
+        https://www.perplexity.ai/computer
+-->
+<meta name="generator" content="Perplexity Computer">
+<meta name="author" content="Perplexity Computer">
+<meta property="og:see_also" content="https://www.perplexity.ai/computer">
+<link rel="author" href="https://www.perplexity.ai/computer">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MonoID — Monospace Font Identifier</title>
+<meta name="description" content="Upload a screenshot of code and identify the monospace font used. Get download links and font details.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300..800;1,300..800&family=Inter:wght@300..700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <svg class="logo-icon" width="32" height="32" viewBox="0 0 32 32" fill="none" aria-label="MonoID Logo">
+          <rect x="2" y="4" width="28" height="24" rx="3" stroke="currentColor" stroke-width="2"/>
+          <text x="7" y="21" font-family="monospace" font-size="14" font-weight="700" fill="currentColor">M?</text>
+        </svg>
+        <div class="header-title">
+          <h1>MonoID</h1>
+          <span class="header-subtitle">monospace font identifier</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="theme-toggle" data-theme-toggle aria-label="Toggle theme">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+      <!-- Upload Section -->
+      <section class="upload-section" id="upload-section">
+        <label class="upload-zone" id="upload-zone" for="file-input" tabindex="0" role="button" aria-label="Toque ou arraste uma imagem para enviar">
+          <div class="upload-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
+          <p class="upload-text" id="upload-text">Arraste, clique ou cole com <kbd>Ctrl+V</kbd></p>
+          <p class="upload-hint">JPEG, PNG, GIF, WebP — max 20MB</p>
+          <input type="file" id="file-input" class="sr-only" accept="image/jpeg,image/png,image/gif,image/webp">
+        </label>
+
+        <!-- OR divider + URL input -->
+        <div class="upload-divider" id="upload-divider">
+          <span class="divider-line"></span>
+          <span class="divider-text">ou cole uma URL</span>
+          <span class="divider-line"></span>
+        </div>
+        <div class="url-input-row" id="url-input-row">
+          <div class="url-input-wrap">
+            <svg class="url-input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+            </svg>
+            <input type="url" id="url-input" class="url-input" placeholder="https://exemplo.com/screenshot.png" autocomplete="off" spellcheck="false">
+            <button class="url-submit-btn" id="url-submit-btn" disabled aria-label="Buscar imagem">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="12 5 19 12 12 19"/>
+              </svg>
+            </button>
+          </div>
+          <p class="url-error" id="url-error" hidden></p>
+        </div>
+
+        <!-- Preview with Crop -->
+        <div class="preview-container" id="preview-container" hidden>
+          <div class="preview-header">
+            <span class="preview-label">Selecione a região do texto</span>
+            <div class="preview-actions">
+              <button class="btn-reset-crop" id="btn-reset-crop" hidden aria-label="Reset selection">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                </svg>
+                Limpar seleção
+              </button>
+              <button class="btn-clear" id="btn-clear" aria-label="Remove image">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+                Remover
+              </button>
+            </div>
+          </div>
+          <div class="preview-image-wrap" id="preview-image-wrap">
+            <div class="crop-container" id="crop-container">
+              <img id="preview-image" alt="Uploaded code screenshot">
+              <canvas id="crop-canvas"></canvas>
+            </div>
+          </div>
+          <p class="crop-hint" id="crop-hint">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6.13 1L6 16a2 2 0 0 0 2 2h15"/><path d="M1 6.13L16 6a2 2 0 0 1 2 2v15"/></svg>
+            Clique e arraste para selecionar apenas o trecho de código
+          </p>
+        </div>
+
+        <!-- Analyze Button -->
+        <button class="btn-analyze" id="btn-analyze" disabled>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          Identificar Fonte
+        </button>
+      </section>
+
+      <!-- Loading State -->
+      <section class="loading-section" id="loading-section" hidden>
+        <div class="loading-animation">
+          <div class="loading-glyphs">
+            <span>A</span><span>a</span><span>0</span><span>g</span><span>l</span><span>{</span><span>}</span><span>=</span><span>></span>
+          </div>
+          <p class="loading-text">Analisando caracteres...</p>
+          <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+        </div>
+      </section>
+
+      <!-- Results Section -->
+      <section class="results-section" id="results-section" hidden>
+        <div class="results-header">
+          <h2>Resultado da Análise</h2>
+          <button class="btn-new" id="btn-new">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+            </svg>
+            Nova análise
+          </button>
+        </div>
+
+        <!-- Visual Comparison -->
+        <div class="result-card comparison-card" id="comparison-card" hidden>
+          <h3>Comparação Visual</h3>
+          <p class="comparison-hint">Imagem original vs. renderização com as fontes sugeridas</p>
+          <div class="comparison-tabs" id="comparison-tabs"></div>
+          <div class="comparison-panel">
+            <div class="comparison-side comparison-original">
+              <div class="comparison-label">Original</div>
+              <div class="comparison-image-wrap">
+                <img id="comparison-original-img" alt="Original screenshot">
+              </div>
+            </div>
+            <div class="comparison-divider">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8L22 12L18 16"/><path d="M6 8L2 12L6 16"/><line x1="2" y1="12" x2="22" y2="12" stroke-dasharray="2 2"/></svg>
+            </div>
+            <div class="comparison-side comparison-rendered">
+              <div class="comparison-label" id="comparison-font-label">—</div>
+              <div class="comparison-code-wrap">
+                <pre class="comparison-code" id="comparison-code"></pre>
+              </div>
+            </div>
+          </div>
+          <div class="comparison-controls">
+            <label class="comparison-size-label">
+              <span>Tamanho:</span>
+              <input type="range" id="comparison-font-size" min="10" max="24" value="14" step="1">
+              <span id="comparison-size-value" class="comparison-size-val">14px</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Primary Match -->
+        <div class="result-card primary-card" id="primary-card">
+          <div class="card-badge">Melhor correspondência</div>
+          <div class="card-header">
+            <div class="card-title-row">
+              <h3 class="font-name" id="primary-name">—</h3>
+              <div class="confidence-badge" id="primary-confidence">
+                <span class="confidence-value">0%</span>
+              </div>
+            </div>
+            <p class="font-reasoning" id="primary-reasoning"></p>
+          </div>
+          <div class="card-features" id="primary-features"></div>
+          <div class="card-meta" id="primary-meta"></div>
+          <div class="card-actions" id="primary-actions"></div>
+        </div>
+
+        <!-- Observed Features -->
+        <div class="result-card features-card" id="features-card">
+          <h3>Características Observadas</h3>
+          <div class="features-grid" id="features-grid"></div>
+          <p class="features-notes" id="features-notes"></p>
+        </div>
+
+        <!-- Alternatives -->
+        <div class="result-card alternatives-card" id="alternatives-card" hidden>
+          <h3>Alternativas Possíveis</h3>
+          <div class="alternatives-list" id="alternatives-list"></div>
+        </div>
+
+        <!-- Feedback Card -->
+        <div class="result-card feedback-card" id="feedback-card">
+          <div class="feedback-header">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/>
+            </svg>
+            <h3>Não bateu?</h3>
+          </div>
+          <p class="feedback-subtitle">Se as fontes sugeridas não parecem corretas, nos avise para melhorar.</p>
+
+          <!-- Reason buttons -->
+          <div class="feedback-reasons" id="feedback-reasons">
+            <button class="feedback-reason-btn" data-reason="visual_mismatch">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+              Fontes muito diferentes
+            </button>
+            <button class="feedback-reason-btn" data-reason="missing_font">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+              A fonte certa não apareceu
+            </button>
+            <button class="feedback-reason-btn" data-reason="wrong_features">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Características erradas
+            </button>
+            <button class="feedback-reason-btn" data-reason="other">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Outro motivo
+            </button>
+          </div>
+
+          <!-- Expanded form (hidden until reason selected) -->
+          <div class="feedback-form" id="feedback-form" hidden>
+            <label class="feedback-form-label" for="feedback-details">Detalhes (opcional)</label>
+            <textarea id="feedback-details" class="feedback-textarea" rows="3" placeholder="Ex: eu sei que é Operator Mono, mas apareceu Fira Code..."></textarea>
+            <div class="feedback-form-actions">
+              <button class="feedback-cancel-btn" id="feedback-cancel">Cancelar</button>
+              <button class="feedback-submit-btn" id="feedback-submit">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                Enviar feedback
+              </button>
+            </div>
+          </div>
+
+          <!-- Success state -->
+          <div class="feedback-success" id="feedback-success" hidden>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <div>
+              <p class="feedback-success-title">Feedback registrado</p>
+              <p class="feedback-success-text">Obrigado. Tente novamente com outro recorte ou outra imagem.</p>
+            </div>
+            <button class="btn-new feedback-retry-btn" id="feedback-retry">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+              Tentar novamente
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer">
+        Created with Perplexity Computer
+      </a>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
