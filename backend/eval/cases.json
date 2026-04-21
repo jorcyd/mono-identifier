@@ -1,0 +1,38 @@
+[
+  {
+    "file": "jetbrains_mono_dark.png",
+    "true_font": "JetBrains Mono",
+    "notes": "Screenshot típico do VS Code em tema escuro, tamanho ~14px",
+    "__placeholder__": true
+  },
+  {
+    "file": "fira_code_ligatures.png",
+    "true_font": "Fira Code",
+    "notes": "Inclui ligaduras => != — crítico para distinguir de Fira Mono",
+    "__placeholder__": true
+  },
+  {
+    "file": "source_code_pro_light.png",
+    "true_font": "Source Code Pro",
+    "notes": "Tema claro, VS Code",
+    "__placeholder__": true
+  },
+  {
+    "file": "cascadia_code_italic.png",
+    "true_font": "Cascadia Code",
+    "notes": "Com itálico cursive — é o traço distintivo",
+    "__placeholder__": true
+  },
+  {
+    "file": "ibm_plex_mono.png",
+    "true_font": "IBM Plex Mono",
+    "notes": "Serifas leves, a doublestory, g single-story",
+    "__placeholder__": true
+  },
+  {
+    "file": "operator_mono_cursive.png",
+    "true_font": "Operator Mono",
+    "notes": "Fonte paga — re-rank não vai aplicar; esperamos manter top-1 do upstream",
+    "__placeholder__": true
+  }
+]

@@ -191,11 +191,23 @@
                 <span class="confidence-value">0%</span>
               </div>
             </div>
+            <div class="visual-sim" id="primary-visual-sim" hidden>
+              <div class="vs-header">
+                <span class="vs-label">Similaridade visual</span>
+                <span class="vs-value">0%</span>
+              </div>
+              <div class="vs-bar"><div class="vs-bar-fill"></div></div>
+              <p class="vs-hint">Renderizamos a fonte localmente e comparamos com o seu recorte.</p>
+            </div>
             <p class="font-reasoning" id="primary-reasoning"></p>
           </div>
           <div class="card-features" id="primary-features"></div>
           <div class="card-meta" id="primary-meta"></div>
           <div class="card-actions" id="primary-actions"></div>
+          <div class="low-sim-cta" id="low-sim-cta" hidden>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span>Similaridade visual baixa. Tente um recorte maior, com mais linhas e em maior resolução.</span>
+          </div>
         </div>
 
         <!-- Observed Features -->
