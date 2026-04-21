@@ -1,7 +1,18 @@
 // MonoID — Monospace Font Identifier
 // Frontend logic
 
-const API = "port/8000".startsWith("__") ? "" : "port/8000";
+// API base URL resolution:
+//   1. window.MONOID_API (inline override, ex: `window.MONOID_API = "http://..."`)
+//   2. <meta name="monoid-api" content="http://...">
+//   3. same origin (empty string) if served alongside the backend
+//   4. fallback: http://localhost:8000 for local dev
+const API = (() => {
+  if (typeof window !== "undefined" && window.MONOID_API) return window.MONOID_API;
+  const meta = document.querySelector('meta[name="monoid-api"]');
+  if (meta?.content) return meta.content.trim();
+  if (location.origin && location.protocol !== "file:") return "";
+  return "http://localhost:8000";
+})();
 
 // DOM Elements
 const uploadZone = document.getElementById("upload-zone");
@@ -473,13 +484,28 @@ btnAnalyze.addEventListener("click", analyzeFont);
 async function analyzeFont() {
   if (!selectedFile) return;
 
+  let imageBlob;
+  try {
+    imageBlob = await getCroppedBlob();
+  } catch (err) {
+    alert(`Erro ao preparar imagem: ${err.message}`);
+    return;
+  }
+
+  const quality = await assessCropQuality(imageBlob);
+  if (quality.warnings.length > 0) {
+    const msg = "A análise pode não acertar porque:\n\n• " +
+      quality.warnings.join("\n• ") +
+      "\n\nContinuar mesmo assim?";
+    if (!confirm(msg)) return;
+  }
+
   // Show loading
   uploadSection.hidden = true;
   loadingSection.hidden = false;
   resultsSection.hidden = true;
 
   try {
-    const imageBlob = await getCroppedBlob();
     const formData = new FormData();
     formData.append("file", imageBlob, "image.png");
 
@@ -501,6 +527,80 @@ async function analyzeFont() {
     uploadSection.hidden = false;
     loadingSection.hidden = true;
   }
+}
+
+// ==================
+// Crop Quality Assessment
+// ==================
+
+// Avalia o blob que vai ser enviado e retorna { warnings: string[], metrics }.
+// Rodamos rápido: decodifica via ImageBitmap, mede dimensões, contraste (stddev
+// de luminância) e densidade de borda para estimar se dá para identificar fonte.
+async function assessCropQuality(blob) {
+  const out = { warnings: [], metrics: {} };
+  if (!blob) return out;
+
+  let bitmap;
+  try {
+    bitmap = await createImageBitmap(blob);
+  } catch {
+    return out; // falha silenciosa — deixa o backend validar
+  }
+
+  const w = bitmap.width, h = bitmap.height;
+  out.metrics.width = w;
+  out.metrics.height = h;
+
+  if (w < 300 || h < 80) {
+    out.warnings.push(`recorte muito pequeno (${w}x${h}px) — fontes parecidas ficam indistinguíveis`);
+  }
+
+  // Mini canvas para medir contraste + densidade de borda (amostragem até 600x400)
+  const targetW = Math.min(w, 600);
+  const targetH = Math.round(h * (targetW / w));
+  const canvas = document.createElement("canvas");
+  canvas.width = targetW;
+  canvas.height = targetH;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  ctx.drawImage(bitmap, 0, 0, targetW, targetH);
+  bitmap.close?.();
+
+  const { data } = ctx.getImageData(0, 0, targetW, targetH);
+  let sum = 0, sumSq = 0, n = 0;
+  const lum = new Uint8ClampedArray(targetW * targetH);
+  for (let i = 0, j = 0; i < data.length; i += 4, j++) {
+    // Rec. 709 luma
+    const y = (0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2]) | 0;
+    lum[j] = y;
+    sum += y;
+    sumSq += y * y;
+    n++;
+  }
+  const mean = sum / n;
+  const variance = sumSq / n - mean * mean;
+  const stddev = Math.sqrt(Math.max(0, variance));
+  out.metrics.contrast = +(stddev / 255).toFixed(3);
+  out.metrics.meanLuminance = +(mean / 255).toFixed(3);
+
+  if (out.metrics.contrast < 0.12) {
+    out.warnings.push("contraste baixo — o texto está muito próximo do fundo em luminosidade");
+  }
+
+  // Densidade de borda rápida: diferença horizontal absoluta média
+  let edgeSum = 0, edgeN = 0;
+  for (let y = 0; y < targetH; y++) {
+    for (let x = 1; x < targetW; x++) {
+      edgeSum += Math.abs(lum[y * targetW + x] - lum[y * targetW + x - 1]);
+      edgeN++;
+    }
+  }
+  const edgeDensity = edgeSum / edgeN / 255;
+  out.metrics.edgeDensity = +edgeDensity.toFixed(3);
+  if (edgeDensity < 0.02) {
+    out.warnings.push("pouco conteúdo de texto — tente incluir mais linhas de código no recorte");
+  }
+
+  return out;
 }
 
 // ==================
@@ -532,7 +632,37 @@ function displayResults(data) {
   const conf = Math.round((primary.confidence || 0) * 100);
   const confBadge = document.getElementById("primary-confidence");
   confBadge.querySelector(".confidence-value").textContent = `${conf}%`;
-  confBadge.className = "confidence-badge " + (conf >= 70 ? "high" : conf >= 40 ? "medium" : "low");
+  // Thresholds recalibrados agora que confidence mistura visual + upstream (0.7*visual + 0.3*upstream)
+  confBadge.className = "confidence-badge " + (conf >= 75 ? "high" : conf >= 55 ? "medium" : "low");
+
+  // Visual similarity (novo): só aparece se o backend devolveu
+  const visSimEl = document.getElementById("primary-visual-sim");
+  if (visSimEl) {
+    if (typeof primary.visual_similarity === "number") {
+      const vs = Math.round(primary.visual_similarity * 100);
+      visSimEl.hidden = false;
+      visSimEl.querySelector(".vs-value").textContent = `${vs}%`;
+      visSimEl.querySelector(".vs-bar-fill").style.width = `${vs}%`;
+      visSimEl.classList.remove("vs-low", "vs-medium", "vs-high");
+      visSimEl.classList.add(vs >= 75 ? "vs-high" : vs >= 55 ? "vs-medium" : "vs-low");
+    } else if (primary.renderable === false) {
+      visSimEl.hidden = false;
+      visSimEl.querySelector(".vs-value").textContent = "—";
+      visSimEl.querySelector(".vs-bar-fill").style.width = "0%";
+      visSimEl.classList.remove("vs-low", "vs-medium", "vs-high");
+      visSimEl.classList.add("vs-unavailable");
+      visSimEl.title = "Fonte paga/restrita — não foi possível verificar visualmente";
+    } else {
+      visSimEl.hidden = true;
+    }
+  }
+
+  // CTA de baixa similaridade: sugere melhor recorte
+  const lowSimEl = document.getElementById("low-sim-cta");
+  if (lowSimEl) {
+    const sim = typeof primary.visual_similarity === "number" ? primary.visual_similarity : null;
+    lowSimEl.hidden = !(sim !== null && sim < 0.55);
+  }
 
   document.getElementById("primary-reasoning").textContent = primary.reasoning || "";
 
@@ -667,11 +797,19 @@ function displayResults(data) {
         linksHtml += `<a href="https://www.google.com/search?q=${q}" target="_blank" rel="noopener" class="btn-link">Buscar</a>`;
       }
 
+      const vs = typeof alt.visual_similarity === "number" ? Math.round(alt.visual_similarity * 100) : null;
+      const vsBadge = vs !== null
+        ? `<span class="alt-visual-sim ${vs >= 75 ? "vs-high" : vs >= 55 ? "vs-medium" : "vs-low"}" title="Similaridade visual com a imagem original">${vs}% visual</span>`
+        : (alt.renderable === false
+            ? `<span class="alt-visual-sim vs-unavailable" title="Fonte paga/restrita — não verificável visualmente">não verificável</span>`
+            : "");
+
       item.innerHTML = `
         <div class="alt-header">
           <span class="alt-name">${esc(alt.name || "?")}${priceBadge ? " " + priceBadge : ""}</span>
           <span class="alt-confidence">${altConf}%</span>
         </div>
+        ${vsBadge ? `<div class="alt-metrics">${vsBadge}</div>` : ""}
         <p class="alt-reasoning">${esc(alt.reasoning || "")}</p>
         ${linksHtml ? `<div class="alt-links">${linksHtml}</div>` : ""}
       `;

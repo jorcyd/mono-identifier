@@ -1,0 +1,6 @@
+.env
+cache/
+fonts_cache/
+__pycache__/
+*.pyc
+.pytest_cache/
